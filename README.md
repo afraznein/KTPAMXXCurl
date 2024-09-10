@@ -1,3 +1,6 @@
+# !!! Development and support of the module has been discontinued !!!
+If you are looking for an actual and maintained module to work with HTTP and FTP, you can use https://github.com/Next21Team/AmxxEasyHttp.
+
 # Description
 
 AmxxCurl module is a wrapper over libcurl (with ssl support) easy interface for amxmodx. Module performs curl's in non-blocking mode.
