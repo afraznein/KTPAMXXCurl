@@ -5,34 +5,42 @@
 
 extern AMX_NATIVE_INFO g_amx_curl_natives[];
 
+// KTP: Frame callback for async cURL processing
+// This replaces Metamod's StartFrame callback
+void CurlFrameCallback()
+{
+    AmxCurlController::Instance().get_asio_poller().Poll();
+}
+
 // amxmodx
 
 void OnAmxxAttach()
 {
     CURLcode res = curl_global_init(CURL_GLOBAL_ALL);
     if(res != CURLE_OK)
+    {
         MF_PrintSrvConsole("[CURL] Cannot init curl: ", curl_easy_strerror(res));
-    else
-        MF_AddNatives(g_amx_curl_natives);
+        return;
+    }
+
+    MF_AddNatives(g_amx_curl_natives);
+
+    // KTP: Register frame callback for async processing (KTPAMXX only)
+    if (MF_RegModuleFrameFunc)
+        MF_RegModuleFrameFunc(CurlFrameCallback);
 }
 
-// metamod
-
-void StartFrame()
+void OnAmxxDetach()
 {
-    AmxCurlController::Instance().get_asio_poller().Poll();
+    // KTP: Unregister frame callback
+    if (MF_UnregModuleFrameFunc)
+        MF_UnregModuleFrameFunc(CurlFrameCallback);
 
-    SET_META_RESULT(MRES_IGNORED);
-}
-
-void ServerDeactivate()
-{
+    // Wait for all transfers to complete and clean up
+    // (Replaces Metamod's ServerDeactivate callback)
     AmxCurlManager& manager = AmxCurlController::Instance().get_curl_manager();
 
-    //manager.TryInterruptAllTransfers();
     while(!manager.IsAllTransfersCompleted())
         AmxCurlController::Instance().get_asio_poller().Poll();
     manager.RemoveAllTasks();
-
-    SET_META_RESULT(MRES_IGNORED);
 }

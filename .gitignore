@@ -1,3 +1,36 @@
-.atom-build.json
+# Build outputs
 bin/
 build/
+obj/
+
+# IDE and editor files
+.vs/
+.vscode/
+*.vcxproj.user
+*.suo
+*.user
+*.sln.docstates
+
+# Atom build config
+.atom-build.json
+
+# Compiled binaries
+*.dll
+*.so
+*.pdb
+*.ilk
+*.exp
+*.lib
+*.o
+*.obj
+
+# Dependencies (if vendored locally during build)
+# Note: deps/ is committed as it contains required headers
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs
+*.log

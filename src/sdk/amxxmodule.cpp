@@ -2518,6 +2518,10 @@ PFN_AMX_REREGISTER			g_fn_AmxReRegister;
 PFN_REGISTERFUNCTIONEX		g_fn_RegisterFunctionEx;
 PFN_MESSAGE_BLOCK			g_fn_MessageBlock;
 
+// KTP: Module frame callback function pointers
+PFN_REG_MODULE_FRAME_FUNC	g_fn_RegModuleFrameFunc;
+PFN_UNREG_MODULE_FRAME_FUNC	g_fn_UnregModuleFrameFunc;
+
 // *** Exports ***
 C_DLLEXPORT int AMXX_Query(int *interfaceVersion, amxx_module_info_s *moduleInfo)
 {
@@ -2650,6 +2654,10 @@ C_DLLEXPORT int AMXX_Attach(PFN_REQ_FNPTR reqFnptrFunc)
 	REQFUNC("AmxReregister", g_fn_AmxReRegister, PFN_AMX_REREGISTER);
 
 	REQFUNC("MessageBlock", g_fn_MessageBlock, PFN_MESSAGE_BLOCK);
+
+	// KTP: Module frame callbacks (optional - only available in KTPAMXX)
+	REQFUNC_OPT("RegModuleFrameFunc", g_fn_RegModuleFrameFunc, PFN_REG_MODULE_FRAME_FUNC);
+	REQFUNC_OPT("UnregModuleFrameFunc", g_fn_UnregModuleFrameFunc, PFN_UNREG_MODULE_FRAME_FUNC);
 
 #ifdef MEMORY_TEST
 	// Memory

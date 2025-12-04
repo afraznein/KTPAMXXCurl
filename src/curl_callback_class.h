@@ -2,6 +2,7 @@
 #define _CURL_CALLBACK_CLASS_H_
 
 #include <exception>
+#include <stdexcept>
 #include <string>
 
 #include <curl/curl.h>

@@ -14,10 +14,10 @@
  * -For both library and library class, you can use a comma
  *   to add multiple entries.
  */
-#define MODULE_NAME "CURL AMXX"
-#define MODULE_VERSION "1.1.1"
-#define MODULE_AUTHOR "Polarhigh"
-#define MODULE_URL "https://github.com/Polarhigh/AmxxCurl"
+#define MODULE_NAME "KTP CURL AMXX"
+#define MODULE_VERSION "1.1.1-ktp"
+#define MODULE_AUTHOR "Polarhigh / KTP"
+#define MODULE_URL "https://github.com/Next21Team/AmxxCurl"
 #define MODULE_LOGTAG "CURL"
 #define MODULE_LIBRARY "curl"
 #define MODULE_LIBCLASS "curl"
@@ -31,7 +31,8 @@
 #endif // __DATE__
 
 // metamod plugin?
-#define USE_METAMOD
+// KTP: Disabled Metamod - using KTPAMXX module frame callback API instead
+// #define USE_METAMOD
 
 // use memory manager/tester?
 // note that if you use this, you cannot construct/allocate 
@@ -66,7 +67,7 @@
 #define FN_AMXX_ATTACH OnAmxxAttach
 
 /** AMXX Detach (unload) */
-//#define FN_AMXX_DETACH OnAmxxDetach
+#define FN_AMXX_DETACH OnAmxxDetach
 
 /** All plugins loaded
  * Do forward functions init here (MF_RegisterForward)

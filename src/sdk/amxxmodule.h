@@ -2205,6 +2205,11 @@ typedef int				(*PFN_AMX_REREGISTER)			(AMX * /*amx*/, AMX_NATIVE_INFO * /*list*
 typedef void *			(*PFN_REGISTERFUNCTIONEX)		(void * /*pfn*/, const char * /*desc*/);
 typedef void			(*PFN_MESSAGE_BLOCK)			(int /* mode */, int /* message */, int * /* opt */);
 
+// KTP: Module frame callback for per-frame processing (like cURL async)
+typedef void (*MODULEFRAMEFUNC)(void);
+typedef void			(*PFN_REG_MODULE_FRAME_FUNC)	(MODULEFRAMEFUNC);
+typedef void			(*PFN_UNREG_MODULE_FRAME_FUNC)	(MODULEFRAMEFUNC);
+
 extern PFN_ADD_NATIVES				g_fn_AddNatives;
 extern PFN_ADD_NEW_NATIVES			g_fn_AddNewNatives;
 extern PFN_BUILD_PATHNAME			g_fn_BuildPathname;
@@ -2280,6 +2285,10 @@ extern PFN_GETLOCALINFO				g_fn_GetLocalInfo;
 extern PFN_AMX_REREGISTER			g_fn_AmxReRegister;
 extern PFN_REGISTERFUNCTIONEX		g_fn_RegisterFunctionEx;
 extern PFN_MESSAGE_BLOCK			g_fn_MessageBlock;
+
+// KTP: Module frame callback function pointers
+extern PFN_REG_MODULE_FRAME_FUNC	g_fn_RegModuleFrameFunc;
+extern PFN_UNREG_MODULE_FRAME_FUNC	g_fn_UnregModuleFrameFunc;
 
 #ifdef MAY_NEVER_BE_DEFINED
 // Function prototypes for intellisense and similar systems
@@ -2431,6 +2440,10 @@ void MF_LogError(AMX *amx, int err, const char *fmt, ...);
 #define MF_AmxReRegister g_fn_AmxReRegister
 #define MF_RegisterFunctionEx g_fn_RegisterFunctionEx
 #define MF_MessageBlock g_fn_MessageBlock
+
+// KTP: Module frame callback macros
+#define MF_RegModuleFrameFunc g_fn_RegModuleFrameFunc
+#define MF_UnregModuleFrameFunc g_fn_UnregModuleFrameFunc
 
 #ifdef MEMORY_TEST
 /*** Memory ***/

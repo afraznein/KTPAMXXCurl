@@ -1,5 +1,6 @@
 #include "amx_curl_callback_class.h"
 #include "curl_utils_class.h"
+#include <stdexcept>
 
 CurlCallbackAmx::CurlCallbackAmx(AMX* amx) :
     amx_(amx),
@@ -134,7 +135,7 @@ int CurlCallbackAmx::SeekCallback(curl_off_t offset, int origin)
         return CurlUtils::GetInterruptCodeForCurlCallback(CURLOPT_SEEKFUNCTION);
     }
 
-    // TODO если curl_off_t не 8 байт?
+    // TODO пїЅпїЅпїЅпїЅ curl_off_t пїЅпїЅ 8 пїЅпїЅпїЅпїЅ?
     // void *userp, curl_off_t offset, int origin
     return MF_ExecuteForward(registered_callbacks_[CURLOPT_SEEKFUNCTION], data_[CURLOPT_SEEKDATA], offset >> 32, static_cast<int>(offset), origin);
 }

@@ -83,7 +83,7 @@ project "AmxxCurl"
     links { "libcurl_a_debug" }
 
   filter { "system:linux" }
-    linkoptions { "-Wl,--start-group " .. path.getabsolute("deps/openssl/lib/libcrypto.a") .. " " .. path.getabsolute("deps/openssl/lib/libssl.a") .. " " .. path.getabsolute("deps/curl/lib/libcurl.a") .. " " ..  path.getabsolute("deps/zlib/lib/libz.a") .. " " .. path.getabsolute("deps/cares/lib/libcares.a") .. " -Wl,--end-group" }
+    linkoptions { "-Wl,--start-group \"" .. path.getabsolute("deps/openssl/lib/libcrypto.a") .. "\" \"" .. path.getabsolute("deps/openssl/lib/libssl.a") .. "\" \"" .. path.getabsolute("deps/curl/lib/libcurl.a") .. "\" \""  ..  path.getabsolute("deps/zlib/lib/libz.a") .. "\" \"" .. path.getabsolute("deps/cares/lib/libcares.a") .. "\" -Wl,--end-group" }
 	
   filter "system:linux"
     links { "pthread", "rt" }
