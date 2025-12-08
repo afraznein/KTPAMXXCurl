@@ -19,7 +19,7 @@ void OnAmxxAttach()
     CURLcode res = curl_global_init(CURL_GLOBAL_ALL);
     if(res != CURLE_OK)
     {
-        MF_PrintSrvConsole("[CURL] Cannot init curl: ", curl_easy_strerror(res));
+        MF_PrintSrvConsole("[CURL] Cannot init curl: %s\n", curl_easy_strerror(res));
         return;
     }
 
@@ -27,7 +27,14 @@ void OnAmxxAttach()
 
     // KTP: Register frame callback for async processing (KTPAMXX only)
     if (MF_RegModuleFrameFunc)
+    {
         MF_RegModuleFrameFunc(CurlFrameCallback);
+        MF_PrintSrvConsole("[CURL] Module loaded (extension mode, using frame callbacks)\n");
+    }
+    else
+    {
+        MF_PrintSrvConsole("[CURL] Module loaded\n");
+    }
 }
 
 void OnAmxxDetach()

@@ -50,7 +50,7 @@ workspace "AmxxCurl"
     }
 
 project "AmxxCurl"
-  targetname  "amxxcurl_amxx_i386"
+  targetname  "amxxcurl_ktp_i386"
   kind        "SharedLib"
   language    "C++"
   targetdir   "bin/%{cfg.buildcfg}"
