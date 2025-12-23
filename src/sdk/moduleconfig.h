@@ -17,7 +17,7 @@
 #define MODULE_NAME "KTP CURL AMXX"
 #define MODULE_VERSION "1.1.1-ktp"
 #define MODULE_AUTHOR "Polarhigh / KTP"
-#define MODULE_URL "https://github.com/Next21Team/AmxxCurl"
+#define MODULE_URL "https://github.com/afraznein/KTPAMXXCurl"
 #define MODULE_LOGTAG "CURL"
 #define MODULE_LIBRARY "curl"
 #define MODULE_LIBCLASS "curl"

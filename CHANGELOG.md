@@ -2,7 +2,7 @@
 
 All notable changes to KTP CURL AMXX will be documented in this file.
 
-## [1.1.1-ktp] - 2025-12
+## [1.1.1-ktp] - 2025-12-04
 
 ### KTP Fork - KTPAMXX Integration
 

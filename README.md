@@ -364,7 +364,7 @@ premake5 clean
 
 ## Version History
 
-### v1.1.1-ktp (2025-12) - KTPAMXX Integration
+### v1.1.1-ktp (2025-12-04) - KTPAMXX Integration
 
 - **REMOVED: Metamod dependency** - Now uses KTPAMXX frame callback API
 - **ADDED: MF_RegModuleFrameFunc()** - Module frame callback registration
