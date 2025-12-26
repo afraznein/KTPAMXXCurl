@@ -1,3 +1,8 @@
+# Local dev files (not committed)
+CLAUDE.md
+build_linux.sh
+nul
+
 # Build outputs
 bin/
 build/
