@@ -405,15 +405,16 @@ void CurlMulti::AsioSocketActionCallback(int dir, curl_socket_t s, SocketDataPtr
     /* keep on watching.
      * the socket may have been closed and/or socket_data may have been changed
      * in curl_multi_socket_action(), so check them both */
+    auto sock_it = socket_map_.find(s);
     if (   !error
         && !removed_sockets_.count(s)
-        && socket_map_.find(s) != socket_map_.end()
+        && sock_it != socket_map_.end()
         && socket_data_map_.count(s) > 0)  // Verify socket_data still tracked
     {
         // Re-arm from what libcurl wants NOW — curl_multi_socket_action above may
         // have changed it. ArmWaits skips anything already pending, so a direction
         // libcurl has dropped simply stops being renewed.
-        ArmWaits(socket_data->previous_action, s, socket_data);
+        ArmWaits(socket_data->previous_action, s, socket_data, sock_it->second);
     }
 }
 
@@ -481,20 +482,15 @@ void CurlMulti::SetSock(int act, curl_socket_t s, SocketDataPtr socket_data)
         return;
     }
 
-    ArmWaits(act, s, socket_data);
+    ArmWaits(act, s, socket_data, it->second);
     socket_data->previous_action = act;
 }
 
 // Arms each direction libcurl wants that is not already pending. CURL_POLL_REMOVE
 // masks to neither bit, so it arms nothing.
-void CurlMulti::ArmWaits(int act, curl_socket_t s, SocketDataPtr socket_data)
+void CurlMulti::ArmWaits(int act, curl_socket_t s, SocketDataPtr socket_data,
+                         asio::ip::tcp::socket& tcp_socket)
 {
-    auto it = socket_map_.find(s);
-    if (it == socket_map_.end())
-        return;
-
-    asio::ip::tcp::socket& tcp_socket = it->second;
-
     // Bind the DIRECTION, not `act`: an INOUT-armed handler could not tell libcurl
     // which way it fired and reported both, claiming readiness that never happened.
     // shared_ptr into the handler prevents use-after-free.

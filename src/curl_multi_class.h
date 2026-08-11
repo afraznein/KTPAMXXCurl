@@ -51,8 +51,12 @@ private:
     CurlMulti(const CurlMulti& curl_multi);
     void CheckMultiInfo();
     void SetSock(int act, curl_socket_t s, SocketDataPtr socketData);
-    // Arms whichever direction libcurl wants and is not already pending.
-    void ArmWaits(int act, curl_socket_t s, SocketDataPtr socketData);
+    // Arms whichever direction libcurl wants and is not already pending. Takes the
+    // socket rather than looking it up: both callers must already have proven the fd
+    // is in socket_map_, so requiring the reference makes that a precondition the
+    // compiler enforces instead of a second lookup and a guard that cannot fire.
+    void ArmWaits(int act, curl_socket_t s, SocketDataPtr socketData,
+                  asio::ip::tcp::socket& tcp_socket);
     // `dir` is ONE of CURL_POLL_IN / CURL_POLL_OUT — the direction this handler
     // was armed for, never the composite. A handler that cannot say which way it
     // fired cannot report the right readiness to libcurl.
