@@ -26,6 +26,38 @@ on:
   workflow_dispatch:
 
 jobs:
+  # CU-02 regression gate. The smoke job below proves the module LOADS; it cannot
+  # see a transfer that stalls, because nothing in it performs one. This job drives
+  # the real CurlMulti/AsioPoller against a loopback HTTP server and fails if a
+  # readiness event is dropped -- the defect fixed in 1.3.17, which presented as
+  # CURLE_OPERATION_TIMEDOUT with a partial body and no error a plugin could see.
+  #
+  # Deliberately NOT in the Docker smoke image: the harness links the committed
+  # vendored static libs directly, so a stock runner plus multilib is the whole
+  # requirement. Keeping it here also means it runs on doc-free pushes and PRs
+  # under the same triggers as the smoke job.
+  harness:
+    name: CurlMulti re-arm harness (CU-02)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # The module ships i386, and the vendored .a files are 32-bit, so the harness
+      # builds -m32. Without multilib the link fails with a bare "cannot find -lz",
+      # which reads like a missing dependency rather than a missing toolchain.
+      - name: Install 32-bit toolchain
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq gcc-multilib g++-multilib
+
+      # Exit codes: 0 GREEN, 1 RED (event dropped / transfer did not complete),
+      # 2 INCONCLUSIVE (the INOUT overlap never formed, so the run proves nothing).
+      # 2 must fail the job -- a harness that silently stops exercising the defect
+      # is the failure mode this gate exists to prevent, and it would otherwise
+      # look identical to a pass.
+      - name: Run harness
+        run: bash tests/build_harness.sh
+
   smoke:
     uses: afraznein/KTPInfrastructure/.github/workflows/smoke-callable.yml@main
     with:
