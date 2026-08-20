@@ -136,6 +136,32 @@ native curl_easy_cleanup(const CURL:handle);
 native curl_easy_reset(const CURL:handle);
 ```
 
+### Caller contracts
+
+Three ways a plugin can use this module correctly by the compiler's reckoning and
+still be wrong. Each one has shipped to the fleet.
+
+**A `CURLcode` of `CURLE_OK` says nothing about the HTTP status.** It reports that
+the transfer completed, so 401, 403, 429 and 500 all arrive looking like success —
+a callback that checks only the `CURLcode` logs rejected auth and rate limits as
+sends. Always follow up with `curl_easy_getinfo(handle, CURLINFO_RESPONSE_CODE, ...)`.
+Check that call's own return too: on anything other than `CURLE_OK` the out-param is
+**not written**, so a freshly declared Pawn local keeps its zero-init value and reads
+as a legitimate response code of 0.
+
+**Give every callback its own Pawn function.** A function registered both as a menu
+callback and as a curl completion callback can resolve to the wrong forward, because
+the registration dedup has matched on plugin plus function name without regard to
+parameter types — at which point a menu selection integer is handed to native code
+expecting a string pointer. Cheap to avoid, expensive to diagnose.
+
+**A header `curl_slist` shared by async transfers cannot be freed.** Freeing one
+while an in-flight handle still points at it takes the engine down, so the usual
+shape is a list built once at `plugin_init` and deliberately never released. The
+consequence to plan for: those header values are then fixed for the process. Re-reading
+a config file updates the plugin's own globals while the headers on the wire stay
+exactly as they were at init, which looks like the reload silently doing nothing.
+
 ### URL Encoding
 
 ```pawn
@@ -399,6 +425,18 @@ one is not.
 | `WARNING: curl_easy_cleanup called on handle N while transfer is in progress — deferring cleanup` | Benign. Cleanup runs when the transfer finishes. |
 | `WARNING: curl_easy_perform called on handle N while a transfer is already in progress — ignoring` | Plugin bug. The call is **refused** (1.3.14+) rather than corrupting the in-flight transfer. |
 | `WARNING: curl_easy_reset called on handle N while transfer is in progress — ignoring` | Plugin bug, same contract as above. |
+
+### Transfer timeouts (curl code 28)
+
+A code 28 on a request the plugin fires during map load is almost always the caller's
+budget, not the network: the map-load stall on a busy host can outlast a short
+per-request timeout on its own, and the request that trips it is usually one a plugin
+re-fires on every map. It is cosmetic where the payload does not matter — hosts have
+logged bursts of these on days with no player traffic at all.
+
+**Raise the caller's latch, not the timeout.** A longer timeout buries the one signal
+that distinguishes a slow host from a hung transfer, and this class of 28 is the
+cheapest evidence there is that a host's map-load stall is growing.
 
 ### Fatal
 
