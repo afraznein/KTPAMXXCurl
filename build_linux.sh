@@ -6,6 +6,25 @@
 
 set -e
 
+# A failed build must be VISIBLE, not merely non-zero. Callers pipe this script
+# (`| tail`, `| tee`), and the shell then reports the PIPE's status -- so a failed
+# build reads as exit 0 unless the log itself says so. Gate on the banners below,
+# never on the exit code.
+_ktp_build_exit() {
+    local rc=$?
+    [ -n "${BUILD_STAMP:-}" ] && rm -f "$BUILD_STAMP"
+    if [ "$rc" -ne 0 ]; then
+        echo ""
+        echo "========================================"
+        echo "[KTP-BUILD] FAILED: KTPAmxxCurl build_linux.sh exited $rc"
+        echo "========================================"
+        echo "Nothing has been staged."
+    fi
+    exit "$rc"
+}
+trap _ktp_build_exit EXIT
+
+
 echo "========================================"
 echo "KTPAmxxCurl Linux Build Script (CMake)"
 echo "========================================"
@@ -24,7 +43,6 @@ done
 # branch below was unreachable. A failed build that prints nothing reads like a
 # short success in a scrollback, which is how a stale artifact gets shipped.
 BUILD_STAMP="$(mktemp)"
-trap 'rm -f "$BUILD_STAMP"' EXIT
 
 # Clean and build
 rm -rf build
@@ -95,3 +113,7 @@ else
     echo "Nothing has been staged."
     exit 1
 fi
+
+# Success sentinel, last line on the only path that reaches here. A caller checks
+# for this rather than for `$?`, which a pipe launders.
+echo "[KTP-BUILD] OK: KTPAmxxCurl build_linux.sh"
