@@ -71,6 +71,14 @@ libcurl's connection cache and, worse, can hand a recycled fd number to the
 - A `[CURL] WARNING stale socket_map_ entry` in the logs means the contract
   above was violated somewhere (a missed close callback) — **investigate
   immediately**, it has never fired in the field. Do not silence it.
+- **Clean logs are not evidence this contract is being honoured.** libcurl
+  checks a cached connection for liveness before reusing it, and when it finds
+  an fd that was closed behind its back it discards the connection and re-dials
+  in silence — no error, no socket callback. Surfacing a real `EBADF` needs the
+  racy variant, where the fd number has already been reissued to a *concurrent*
+  transfer, and KTP's sequential match traffic almost never forces that. The
+  pre-1.3.14 bug therefore ran for months looking healthy. Reason about this
+  path from the code, never from the absence of a symptom.
 - Member order matters: `asio_poller_` must stay declared before
   `curl_manager_` in the controller — C++ destructs in reverse declaration
   order, and kept-open sockets need a live `io_context` to destruct against.
@@ -139,6 +147,16 @@ out to the scratch dir over running tools "in place".
 3. **Test**: prefer a tier-2 red→green contract test for crash-class or
    lifecycle fixes (see PR #40's shape — a test that fails on the old code
    and passes on the fix, not just a smoke run).
+   ⚠️ **A test that never exercises connection reuse cannot see the whole
+   class of bug this module is prone to, and it passes either way.** Two
+   properties of the mock decide that, and both were wrong once: it must
+   speak **HTTP/1.1**, because against an HTTP/1.0 responder libcurl never
+   caches a connection at all — the original socket-lifecycle bug and any
+   regression from its fix both ran green; and it must **drain the request
+   body on every path, including the ones it rejects**, because unread bytes
+   left in a kept-alive stream get parsed as the next request line, and the
+   mock answers its own legitimate reuse with a 501 and `Connection: close`.
+   Assert on reuse happening, not just on the response.
 4. **Fleet stage**: `.new` via paramiko to all 24 active instances;
    md5-verify every staged file.
 5. **Post-activation verify**: 24/24 on the new md5, no leftover `.new`, zero
