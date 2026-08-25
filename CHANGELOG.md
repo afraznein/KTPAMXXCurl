@@ -4,7 +4,9 @@ All notable changes to KTP CURL AMXX will be documented in this file.
 
 ## [1.3.17-ktp] - 2026-08-10
 
-Shipped binary `amxxcurl_ktp_i386.so` md5 **214ec285d706855909962e3e40d47d1a** (built from a clean tree at the commit that ships it; this module's `build_linux.sh` does not bake the git SHA, so the pin is reproducible).
+Shipped binary `amxxcurl_ktp_i386.so` md5 **6de9919edc2aa3a0abf39e0868fe580c** — verified 24/24 on the live fleet 2026-08-25 (`md5sum .../dod/addons/ktpamx/modules/amxxcurl_ktp_i386.so` on every instance; matches root `CLAUDE.md`'s version table).
+
+⚠️ **This line originally pinned `214ec285d706855909962e3e40d47d1a`**, the build taken right after the CU-02 fix (`bd5841d`) landed. Commit `7fa37d3`, a same-day source refactor ("pass the socket into ArmWaits instead of looking it up again"), changed `SocketData` after that pin was written but before the binary that actually shipped was built — so a later build legitimately carries a different md5 under the same `1.3.17-ktp` label with no version bump. `214ec285d706855909962e3e40d47d1a` is that superseded pre-refactor build: **retired, do not stage it.**
 
 ### Fixed
 - **Readiness events were silently dropped, stalling transfers to `CURLOPT_TIMEOUT`
